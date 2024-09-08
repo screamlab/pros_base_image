@@ -1,0 +1,4 @@
+# TODO add the python package you need 
+orjson
+pydantic==1.10
+pyserial

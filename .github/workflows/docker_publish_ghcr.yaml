@@ -1,0 +1,101 @@
+# This YAML file is refered to
+# https://youtu.be/RgZyX-e6W9E?si=iISxsuXEZKma4SVv
+# https://youtu.be/Tx1UElRhELg?si=MrbyhgWCwlGVtgyD
+
+name: Docker Image CI for GitHub Container Registry (GHCR)
+
+on:
+  push:
+    tags:
+      - '*'  # Triggered on new tag
+  schedule:
+    - cron: '0 0 1 * *'  # Runs at 00:00 on the 1st of every month
+
+env:
+  # Use docker.io for Docker Hub if empty
+  # Here we use GitHub Container Registry (GHCR) to store our images
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  # IMAGE_NAME: ${{ github.repository }}  # This will have problem with uppercase
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.repository }}
+
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    name: Build and Push Docker Image
+
+    steps:
+      # This is going to pull our code from the repository
+      # into the actions runner in order to build the image
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      # Add support for more platforms with QEMU (optional)
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        # Choose one method
+        # 1. Use login-action
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}  # You can use the default GitHub token
+          # password: ${{ secrets.DOCKER_PAT }}  # Or you can use your pre-generated Personal Access Token
+        # 2. Use command line
+        # run: |
+        #   docker login ${{ env.REGISTRY }} --username ${{ github.actor }} --password ${{ secrets.DOCKER_PAT }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      
+      - name: Determine Image Tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Triggered by a tag, use the tag name
+            # echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TAG=${{ steps.meta.outputs.tags }}" >> $GITHUB_ENV
+          else
+            # Triggered by schedule, use 'latest' and append the date
+            latest_tag=$(git describe --tags --abbrev=0)
+            date_tag=$(date +%Y%m%d)
+            echo "TAG=${latest_tag}-${date_tag}" >> $GITHUB_ENV
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        # Choose one method
+        # 1. Use build-push-action
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # TODO: Improve pipeline with https://docs.docker.com/build/ci/github-actions/multi-platform/
+          platforms: linux/arm64,linux/amd64  # ,linux/arm/v7
+        # 2. Use command lines
+        # run: docker buildx build --platform linux/amd64,linux/arm64 -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} -f ./Dockerfile --push .
