@@ -54,8 +54,8 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}  # You can use the default GitHub token
-          # password: ${{ secrets.DOCKER_PAT }}  # Or you can use your pre-generated Personal Access Token
+          # password: ${{ secrets.GITHUB_TOKEN }}  # You can use the default GitHub token
+          password: ${{ secrets.DOCKER_PAT }}  # Or you can use your pre-generated Personal Access Token
         # 2. Use command line
         # run: |
         #   docker login ${{ env.REGISTRY }} --username ${{ github.actor }} --password ${{ secrets.DOCKER_PAT }}
@@ -80,6 +80,7 @@ jobs:
             latest_tag=$(git describe --tags --abbrev=0)
             date_tag=$(date +%Y%m%d)
             echo "TAG=${latest_tag}-${date_tag}" >> $GITHUB_ENV
+          fi
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
