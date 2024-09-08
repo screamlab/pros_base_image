@@ -17,7 +17,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   # IMAGE_NAME: ${{ github.repository }}  # This will have problem with uppercase
-  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}
 
 
 jobs:
