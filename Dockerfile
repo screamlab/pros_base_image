@@ -14,7 +14,7 @@ COPY . /tmp
 WORKDIR /tmp
 
 # Copy the run command for rebuilding colcon. You can source it.
-RUN mkdir ${ROS2_WS} && \
+RUN mkdir -p ${ROS2_WS}/src && \
     mv /tmp/rebuild_colcon.rc ${ROS2_WS} && \
 
     # Entrypoint
@@ -25,10 +25,10 @@ RUN mkdir ${ROS2_WS} && \
     apt update && \
     apt upgrade -y && \
     apt autoremove -y && \
-    apt autoclean -y && \
+    apt autoclean -y
 
     # Necessary System Package Installation
-    apt install -y \
+RUN apt install -y \
         axel \
         bash-completion \
         bat \
@@ -49,9 +49,9 @@ RUN mkdir ${ROS2_WS} && \
         tmux \
         tree \
         vim \
-        wget && \
+        wget
 
-    pip3 install --no-cache-dir --upgrade pip && \
+RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir -r /tmp/requirements.txt && \
 
     # Soft Link
@@ -63,30 +63,30 @@ RUN mkdir ${ROS2_WS} && \
 
     # Use our pre-defined bashrc
     mv /tmp/.bashrc /root && \
-    ln -s /root/.bashrc /.bashrc && \
+    ln -s /root/.bashrc /.bashrc
 
     ##### ROS2 Installation #####
     # install ros2
-    apt install -y \
+RUN apt install -y \
         python3-colcon-common-extensions \
         python3-colcon-mixin \
         python3-rosdep \
         python3-vcstool \
         ros-${ROS_DISTRO}-ros-base \
         # install ros bridge
-        ros-${ROS_DISTRO}-rosbridge-suite ccache && \
+        ros-${ROS_DISTRO}-rosbridge-suite ccache
 
     # install boost serial and json
-    apt install -y \
+RUN apt install -y \
         libboost-all-dev \
         libboost-program-options-dev \
         libboost-system-dev \
         libboost-thread-dev \
         libserial-dev \
-        nlohmann-json3-dev && \
+        nlohmann-json3-dev
 
     # bootstrap rosdep
-    rosdep init && \
+RUN rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
 
     # setup colcon mixin and metadata
