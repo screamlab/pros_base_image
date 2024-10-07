@@ -76,11 +76,18 @@ jobs:
             echo "TAG=${{ github.ref_name }}"  # For debugging
             echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            # Triggered by schedule, use 'latest' and append the date
-            latest_tag=$(git describe --tags --abbrev=0)
+            # Triggered by schedule, check if there are tags
+            latest_tag=$(git describe --tags --abbrev=0 2>/dev/null) # Redirect stderr to null
             date_tag=$(date +%Y%m%d)
-            echo "TAG=${latest_tag}-${date_tag}"  # For debugging
-            echo "TAG=${latest_tag}-${date_tag}" >> $GITHUB_ENV
+            if [ -z "$latest_tag" ]; then
+              # If no tags are found, use 'latest' and append the date
+              echo "TAG=latest-${date_tag}"  # For debugging
+              echo "TAG=latest-${date_tag}" >> $GITHUB_ENV
+            else
+              # If a tag is found, use it
+              echo "TAG=${latest_tag}-${date_tag}"  # For debugging
+              echo "TAG=${latest_tag}-${date_tag}" >> $GITHUB_ENV
+            fi
           fi
 
       # Build and push Docker image with Buildx (don't push on PR)
