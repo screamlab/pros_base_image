@@ -3,7 +3,7 @@ This is the base docker image of PROS system. All right reserved.
 
 
 
-## Scheduled GitHub Action CI
+## Scheduled GitHub Action CI (Deprecated)
 
 The GitHub Action has been set to run at 00:00 on the first of every month. This can help us to keep updating from the base image `ros:humble-ros-core-jammy`.
 
