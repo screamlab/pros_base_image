@@ -5,6 +5,8 @@ variables:
   REGISTRY: $CI_REGISTRY  # GitLab provides this variable for the registry URL
   IMAGE_NAME: $CI_PROJECT_PATH  # GitLab equivalent to GitHub's repository variable
   GIT_SUBMODULE_STRATEGY: recursive
+  BUILDX_NAME: "buildx-$CI_JOB_ID"
+
 
 
 build_and_publish:
@@ -33,7 +35,7 @@ build_and_publish:
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
     # Set up Docker Buildx
-    - docker buildx create --use
+    - docker buildx create --name $BUILDX_NAME --use
     - docker buildx inspect --bootstrap
 
     # Extract metadata (this requires custom commands in GitLab)
@@ -43,11 +45,15 @@ build_and_publish:
     # Build and push Docker image
     - echo "Building and pushing Docker image $REGISTRY/$IMAGE_NAME with tag $TAG"
     - |
-      docker buildx build --provenance=false --platform linux/arm64,linux/amd64 \
+      docker buildx build --builder $BUILDX_NAME --provenance=false --platform linux/arm64,linux/amd64 \
         --build-arg THREADS=$THREADS \
         -t $REGISTRY/$IMAGE_NAME:$TAG \
         -t $REGISTRY/$IMAGE_NAME:latest \
         --push .
+        
+  after_script:
+    - echo "Cleaning up buildx"
+    - docker buildx rm $BUILDX_NAME 
 
   only:
     - tags
