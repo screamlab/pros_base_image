@@ -44,6 +44,7 @@ RUN apt install -y \
         nvtop \
         python3-pip \
         python3-venv \
+        python3-dev \
         screen \
         tig \
         tmux \
