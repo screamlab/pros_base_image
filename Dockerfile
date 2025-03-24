@@ -84,7 +84,11 @@ RUN apt install -y \
         python3-vcstool \
         ros-${ROS_DISTRO}-ros-base \
         # install ros bridge
-        ros-${ROS_DISTRO}-rosbridge-suite ccache
+        ros-${ROS_DISTRO}-rosbridge-suite \
+        ccache \
+        ros-${ROS_DISTRO}-fastrtps \
+        ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
+        ros-${ROS_DISTRO}-rmw-fastrtps-dynamic-cpp
 
     # install boost serial and json
 RUN apt install -y \
