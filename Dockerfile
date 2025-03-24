@@ -29,13 +29,18 @@ RUN mkdir -p ${ROS2_WS}/src && \
 
     # Necessary System Package Installation
 RUN apt install -y \
+        aspell \
         axel \
         bash-completion \
         bat \
         bmon \
         build-essential \
+        clang-format \
+        colordiff \
+        cppcheck \
         curl \
         git \
+        htop \
         libncurses5-dev \
         libncursesw5-dev \
         lsof \
