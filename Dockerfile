@@ -54,6 +54,7 @@ RUN apt install -y \
         tig \
         tmux \
         tree \
+        udev \
         vim \
         wget
 
@@ -69,7 +70,10 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 
     # Use our pre-defined bashrc
     mv /tmp/.bashrc /root && \
-    ln -s /root/.bashrc /.bashrc
+    ln -s /root/.bashrc /.bashrc && \
+
+    # Enable udev daemon
+    /lib/systemd/systemd-udevd --daemon || true
 
     ##### ROS2 Installation #####
     # install ros2
