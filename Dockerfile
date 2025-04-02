@@ -88,7 +88,9 @@ RUN apt install -y \
         ccache \
         ros-${ROS_DISTRO}-fastrtps \
         ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
-        ros-${ROS_DISTRO}-rmw-fastrtps-dynamic-cpp
+        ros-${ROS_DISTRO}-rmw-fastrtps-dynamic-cpp \
+        # install domain bridge
+        ros-$ROS_DISTRO-domain-bridge
 
     # install boost serial and json
 RUN apt install -y \
