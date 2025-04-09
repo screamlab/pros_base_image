@@ -154,3 +154,4 @@ alias l="ls -lash"
 alias r="source /workspaces/rebuild_colcon.rc"
 alias b="ros2 launch rosbridge_server rosbridge_websocket_launch.xml"
 alias m="make -j"
+alias diff=colordiff

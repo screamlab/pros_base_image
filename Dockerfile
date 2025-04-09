@@ -29,13 +29,18 @@ RUN mkdir -p ${ROS2_WS}/src && \
 
     # Necessary System Package Installation
 RUN apt install -y \
+        aspell \
         axel \
         bash-completion \
         bat \
         bmon \
         build-essential \
+        clang-format \
+        colordiff \
+        cppcheck \
         curl \
         git \
+        htop \
         libncurses5-dev \
         libncursesw5-dev \
         lsof \
@@ -44,10 +49,12 @@ RUN apt install -y \
         nvtop \
         python3-pip \
         python3-venv \
+        python3-dev \
         screen \
         tig \
         tmux \
         tree \
+        udev \
         vim \
         wget
 
@@ -63,7 +70,10 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 
     # Use our pre-defined bashrc
     mv /tmp/.bashrc /root && \
-    ln -s /root/.bashrc /.bashrc
+    ln -s /root/.bashrc /.bashrc && \
+
+    # Enable udev daemon
+    /lib/systemd/systemd-udevd --daemon || true
 
     ##### ROS2 Installation #####
     # install ros2
@@ -74,7 +84,13 @@ RUN apt install -y \
         python3-vcstool \
         ros-${ROS_DISTRO}-ros-base \
         # install ros bridge
-        ros-${ROS_DISTRO}-rosbridge-suite ccache
+        ros-${ROS_DISTRO}-rosbridge-suite \
+        ccache \
+        ros-${ROS_DISTRO}-fastrtps \
+        ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
+        ros-${ROS_DISTRO}-rmw-fastrtps-dynamic-cpp \
+        # install domain bridge
+        ros-$ROS_DISTRO-domain-bridge
 
     # install boost serial and json
 RUN apt install -y \
